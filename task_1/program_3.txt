@@ -1,0 +1,19 @@
+public class FlagExample {
+    private volatile int flag = 0;
+
+    public void thread1() {
+        flag = 1;
+    }
+
+    public void thread2() {
+        if (flag == 1) {
+            System.out.println("Flag is set!");
+        }
+    }
+}
+
+************************QUESTIONS***************************
+Data race: YES/NO
+Line numbers: (at which lines the data race occurs, give all the line numbers separated by a comma. Otherwise, leave it empty)
+Variables: (variables involved in the data race, give all the names separated by a comma. Otherwise, leave it empty)
+Possible values of the variable "flag" at the end of execution:

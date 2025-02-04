@@ -1,0 +1,36 @@
+import java.util.concurrent.locks.ReentrantLock;
+
+public class IntegerExample {
+    private int counter = 0;
+    private final ReentrantLock lock = new ReentrantLock();
+
+    public void thread1() {
+        lock.lock();
+        try {
+            counter++;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void thread2() {
+        lock.lock();
+        try {
+            counter++;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+}
+
+
+	
+************************QUESTIONS***************************
+Data race: YES/NO
+Line numbers: (at which lines the data race occurs, give all the line numbers separated by a comma. Otherwise, leave it empty)
+Variables: (variables involved in the data race, give all the names separated by a comma. Otherwise, leave it empty)
+Possible values of the variable "counter" at the end of execution:
