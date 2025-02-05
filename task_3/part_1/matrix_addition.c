@@ -8,6 +8,7 @@
 void addMatrices(float **matrix1, float **matrix2, float **result, int size)
 {
     // Add a suitable OpenMP pragma
+    #pragma omp parallel for collapse(2)
     for (int i = 0; i < size; i++)
     {
         for (int j = 0; j < size; j++)

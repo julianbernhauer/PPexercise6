@@ -17,16 +17,33 @@ typedef struct {
 void *thread_matrix_add(void *arg) {
     ThreadData *data = (ThreadData *)arg;
     // implement the rest here, i.e, the for loop
-    return NULL;
+    for (int i = data->start_row; i < data->end_row; i++) {
+        for (int j = 0; j < data->size; j++) {
+            data->result[i][j] = data->matrix1[i][j] + data->matrix2[i][j];
+        }
+    }
+    pthread_exit(NULL);
 }
 
 void parallel_for_matrix_add(float **matrix1, float **matrix2, float **result, int size, int num_threads) {
     pthread_t threads[num_threads];
     ThreadData thread_data[num_threads];
+    int chunk = size / num_threads;
 
-    // fill in data structure for each thread
-    // create the thread with respective workload
-    // join the threads in the end and, if necessary, aggregate results
+    for (int i = 0; i < num_threads; i++) {
+        thread_data[i].matrix1 = matrix1;
+        thread_data[i].matrix2 = matrix2;
+        thread_data[i].result = result;
+        thread_data[i].size = size;
+        thread_data[i].start_row = i * chunk;
+        //letzte row sollte tritzdem bearbeitet werden
+        thread_data[i].end_row = (i == num_threads - 1) ? size : (i + 1) * chunk;
+        pthread_create(&threads[i], NULL, thread_matrix_add, &thread_data[i]);
+    }
+
+    for (int i = 0; i < num_threads; i++) {
+        pthread_join(threads[i], NULL);
+    }
 }
 
 int main() {

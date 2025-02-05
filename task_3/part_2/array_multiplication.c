@@ -14,7 +14,10 @@ typedef struct {
 void *thread_multiply(void *arg) {
     ThreadData *data = (ThreadData *)arg;
     // implement the rest here, i.e, the for loop
-    return NULL;
+    for (int i = data->start; i < data->end; i++) {
+        data->result[i] = data->array1[i] * data->array2[i];
+    }
+    pthread_exit(NULL);
 }
 
 void parallel_for_multiply(float *array1, float *array2, float *result, int size, int num_threads) {
@@ -24,6 +27,19 @@ void parallel_for_multiply(float *array1, float *array2, float *result, int size
     // fill in data structure for each thread
     // create the thread with respective workload
     // join the threads in the end and, if necessary, aggregate results
+    int chunk = size / num_threads;
+    for (int i = 0; i < num_threads; i++) {
+        thread_data[i].array1 = array1;
+        thread_data[i].array2 = array2;
+        thread_data[i].result = result;
+        thread_data[i].start = i * chunk;
+        thread_data[i].end = (i == num_threads - 1) ? size : (i + 1) * chunk;
+        pthread_create(&threads[i], NULL, thread_multiply, &thread_data[i]);
+    }
+
+    for (int i = 0; i < num_threads; i++) {
+        pthread_join(threads[i], NULL);
+    }
 }
 
 int main() {

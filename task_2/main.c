@@ -13,17 +13,20 @@ int petit_pain_deposit1 = 0, petit_pain_deposit2 = 0;
 
 // Production rates
 int flour_rate = 5; // units per second
-int egg_rate = 10;  // units per second
+int egg_rate = 10; // units per second
 
 // Bakery consumption rates
 int baguette_produced = 0, petit_pain_produced = 0;
 int customer_consumption = 0, restaurant_consumption = 0;
 
+//macro hat kein errorchecking
+pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 // Factory threads
-void *flour_factory(void *arg)
+void* flour_factory(void* arg)
 {
     while (1)
     {
+        pthread_mutex_lock(&mtx);
         if (flour_deposit_A < DEPOSIT_CAPACITY)
         {
             flour_deposit_A += flour_rate;
@@ -39,14 +42,16 @@ void *flour_factory(void *arg)
             flour_deposit_B += flour_rate;
             printf("Flour Factory: Added %d flour to Deposit B. Current: %d\n", flour_rate, flour_deposit_B);
         }
+        pthread_mutex_unlock(&mtx);
         usleep(1000000); // Simulate production time
     }
 }
 
-void *egg_factory(void *arg)
+void* egg_factory(void* arg)
 {
     while (1)
     {
+        pthread_mutex_lock(&mtx);
         if (egg_deposit_A < DEPOSIT_CAPACITY)
         {
             egg_deposit_A += egg_rate;
@@ -67,10 +72,11 @@ void *egg_factory(void *arg)
 }
 
 // Bakery threads
-void *bakery_A(void *arg)
+void* bakery_A(void* arg)
 {
     while (1)
     {
+        pthread_mutex_lock(&mtx);
         if (flour_deposit_A >= 1 && egg_deposit_A >= 2)
         {
             flour_deposit_A--;
@@ -85,16 +91,19 @@ void *bakery_A(void *arg)
             egg_deposit_C -= 2;
             baguette_deposit += 5;
             baguette_produced += 5;
-            printf("Bakery A: Used Deposit C to produce 5 baguettes. Total baguettes produced: %d\n", baguette_produced);
+            printf("Bakery A: Used Deposit C to produce 5 baguettes. Total baguettes produced: %d\n",
+                   baguette_produced);
         }
+        //pthread_mutex_unlock(&mtx);
         usleep(1000000); // Simulate production time
     }
 }
 
-void *bakery_B(void *arg)
+void* bakery_B(void* arg)
 {
     while (1)
     {
+        pthread_mutex_lock(&mtx);
         if (flour_deposit_B >= 1 && egg_deposit_B >= 2)
         {
             flour_deposit_B--;
@@ -111,17 +120,20 @@ void *bakery_B(void *arg)
             petit_pain_deposit1 += 2;
             petit_pain_deposit2 += 2;
             petit_pain_produced += 4;
-            printf("Bakery B: Used Deposit C to produce 4 Petit-pain. Total Petit-pain produced: %d\n", petit_pain_produced);
+            printf("Bakery B: Used Deposit C to produce 4 Petit-pain. Total Petit-pain produced: %d\n",
+                   petit_pain_produced);
         }
+        pthread_mutex_unlock(&mtx);
         usleep(1000000); // Simulate production time
     }
 }
 
 // Consumer threads
-void *customer(void *arg)
+void* customer(void* arg)
 {
     while (1)
     {
+        pthread_mutex_lock(&mtx);
         if (baguette_deposit > 0)
         {
             baguette_deposit--;
@@ -134,29 +146,33 @@ void *customer(void *arg)
             customer_consumption += 2;
             printf("Customer: Consumed 2 petit-pain(s). Total consumed: %d\n", customer_consumption);
         }
+        pthread_mutex_unlock(&mtx);
         usleep(1000000); // Simulate consumption time
     }
 }
 
-void *restaurant(void *arg)
+void* restaurant(void* arg)
 {
     while (1)
     {
+        pthread_mutex_lock(&mtx);
         if (petit_pain_deposit2 >= 4)
         {
             petit_pain_deposit2 -= 4;
             restaurant_consumption += 4;
             printf("Restaurant: Consumed 4 Petit-pain(s). Total consumed: %d\n", restaurant_consumption);
         }
+        pthread_mutex_unlock(&mtx);
         usleep(1000000); // Simulate consumption time
     }
 }
 
 // Summary function to periodically display the current state
-void *display_summary(void *arg)
+void* display_summary(void* arg)
 {
     while (1)
     {
+        pthread_mutex_lock(&mtx);
         printf("\n=============== System Summary ===============\n");
         printf("Flour Deposits: A=%d, B=%d, C=%d\n", flour_deposit_A, flour_deposit_B, flour_deposit_C);
         printf("Egg Deposits: A=%d, B=%d, C=%d\n", egg_deposit_A, egg_deposit_B, egg_deposit_C);
@@ -165,6 +181,7 @@ void *display_summary(void *arg)
         printf("Total Baguettes Produced: %d, Consumed: %d\n", baguette_produced, customer_consumption);
         printf("Total Petit-pain Produced: %d, Consumed: %d\n", petit_pain_produced, restaurant_consumption);
         printf("=============================================\n");
+        pthread_mutex_unlock(&mtx);
         sleep(5); // Display every 5 seconds
     }
 }

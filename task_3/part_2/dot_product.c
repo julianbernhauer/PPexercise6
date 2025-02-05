@@ -13,17 +13,32 @@ typedef struct {
 
 void *thread_dot_product(void *arg) {
     ThreadData *data = (ThreadData *)arg;
-    // implement the rest here, i.e, the for loop
-    return NULL;
+    data->partial_sum = 0;
+    for (int i = data->start; i < data->end; i++) {
+        data->partial_sum += data->array1[i] * data->array2[i];
+    }
+    pthread_exit(NULL);  // Explicit exit (or simply "return NULL;" works too)
 }
 
-float parallel_for_dot_product(float *array1, float *array2, int size, int num_threads) {
+float parallel_for_dot_product(float *array1, float *array2, int size, int num_threads)
+{
     pthread_t threads[num_threads];
     ThreadData thread_data[num_threads];
-
-    // fill in data structure for each thread
-    // create the thread with respective workload
-    // join the threads in the end and, if necessary, aggregate results
+    int chunk = size / num_threads;
+    for (int i = 0; i < num_threads; i++) {
+        thread_data[i].array1 = array1;
+        thread_data[i].array2 = array2;
+        thread_data[i].start = i * chunk;
+        thread_data[i].end = (i == num_threads - 1) ? size : (i + 1) * chunk;
+        thread_data[i].partial_sum = 0;
+        pthread_create(&threads[i], NULL, thread_dot_product, &thread_data[i]);
+    }
+    float total_sum = 0;
+    for (int i = 0; i < num_threads; i++) {
+        pthread_join(threads[i], NULL);
+        total_sum += thread_data[i].partial_sum;
+    }
+    return total_sum;
 }
 
 int main() {

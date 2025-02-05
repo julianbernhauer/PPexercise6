@@ -8,6 +8,7 @@ float dotProduct(float *array1, float *array2, int size)
     float sum = 0.0;
 
     // Add a suitable OpenMP pragma
+    #pragma omp parallel for reduction(+:sum)
     for (int i = 0; i < size; i++)
     {
         sum += array1[i] * array2[i];
