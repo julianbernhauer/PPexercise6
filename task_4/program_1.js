@@ -31,8 +31,15 @@ function uploadFile(file) {
 
 // new implementation using promises
 function uploadFiles(files) {
-  // TODO: add necessary code here
-  return Promise.all(uploadPromises);
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (!files || files.length === 0) {
+        reject(new Error("You should provide files"));
+      } else {
+        resolve(`YOu successfully uploaded your ${files.length} files`);
+      }
+    }, 2000);
+  });
 }
 
 // Test case 1

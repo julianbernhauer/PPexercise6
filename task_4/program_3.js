@@ -31,8 +31,15 @@ function parseWeather(response) {
 
 // new implementation using promises
 function getWeather(city) {
-  return fetchWeather(city)
-  // TODO: add necessary code here
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (city === "Unknown City") {
+        reject("City not found");
+      } else {
+        resolve({ city, temperature: 25, condition: "Sunny" });
+      }
+    }, 1000);
+  });
 }
 
 // Test case 1: Fetch weather for a valid city

@@ -13,7 +13,7 @@ public class FlagExample {
 }
 
 ************************QUESTIONS***************************
-Data race: YES/NO
-Line numbers: (at which lines the data race occurs, give all the line numbers separated by a comma. Otherwise, leave it empty)
-Variables: (variables involved in the data race, give all the names separated by a comma. Otherwise, leave it empty)
-Possible values of the variable "flag" at the end of execution:
+Data race: NO
+Line numbers:
+Variables:
+Possible values of the variable "flag" at the end of execution: 0, 1

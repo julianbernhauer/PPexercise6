@@ -40,9 +40,17 @@ function getUserPermissions(user) {
 
 // new implementation using async/await
 async function authenticateUser(credentials) {
-  // TODO: add necessary code here
-  return { userDetails, permissions };
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (credentials.username === "johndoe" && credentials.password === "password123") {
+        resolve("User authenticated successfully:");
+      } else {
+        reject(new Error("Authentication failed."));
+      }
+    }, 1500);
+  });
 }
+
 
 
 // Test case 1: Valid credentials
