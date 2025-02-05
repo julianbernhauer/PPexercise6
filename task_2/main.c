@@ -25,7 +25,7 @@ pthread_mutex_t mutex_deposit_A = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_deposit_B = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_deposit_C = PTHREAD_MUTEX_INITIALIZER;
 
-// Mutexes for the product counters/deposits
+
 pthread_mutex_t mutex_baguette    = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_petit_pain  = PTHREAD_MUTEX_INITIALIZER;
 
@@ -46,7 +46,7 @@ void* flour_factory(void* arg)
         else
         {
             pthread_mutex_unlock(&mutex_deposit_A);
-            // Deposit A is full; try Deposit C
+
             pthread_mutex_lock(&mutex_deposit_C);
             if (flour_deposit_C < DEPOSIT_CAPACITY)
             {
@@ -57,7 +57,6 @@ void* flour_factory(void* arg)
             else
             {
                 pthread_mutex_unlock(&mutex_deposit_C);
-                // Deposit C is full; try Deposit B
                 pthread_mutex_lock(&mutex_deposit_B);
                 if (flour_deposit_B < DEPOSIT_CAPACITY)
                 {
@@ -112,14 +111,12 @@ void* bakery_A(void* arg)
 {
     while (1)
     {
-        // Try Deposit A first
         pthread_mutex_lock(&mutex_deposit_A);
         if (flour_deposit_A >= 1 && egg_deposit_A >= 2)
         {
             flour_deposit_A--;
             egg_deposit_A -= 2;
             pthread_mutex_unlock(&mutex_deposit_A);
-            // Update baguette counters
             pthread_mutex_lock(&mutex_baguette);
             baguette_deposit += 5;
             baguette_produced += 5;
@@ -129,7 +126,6 @@ void* bakery_A(void* arg)
         else
         {
             pthread_mutex_unlock(&mutex_deposit_A);
-            // Try Deposit C if Deposit A doesn't have enough resources
             pthread_mutex_lock(&mutex_deposit_C);
             if (flour_deposit_C >= 1 && egg_deposit_C >= 2)
             {
@@ -155,7 +151,6 @@ void* bakery_B(void* arg)
 {
     while (1)
     {
-        // Try Deposit B first
         pthread_mutex_lock(&mutex_deposit_B);
         if (flour_deposit_B >= 1 && egg_deposit_B >= 2)
         {
@@ -172,7 +167,6 @@ void* bakery_B(void* arg)
         else
         {
             pthread_mutex_unlock(&mutex_deposit_B);
-            // Try Deposit C if Deposit B does not have enough resources
             pthread_mutex_lock(&mutex_deposit_C);
             if (flour_deposit_C >= 1 && egg_deposit_C >= 2)
             {
@@ -200,7 +194,6 @@ void* customer(void* arg)
 {
     while (1)
     {
-        // Consume one baguette if available
         pthread_mutex_lock(&mutex_baguette);
         if (baguette_deposit > 0)
         {
@@ -216,7 +209,7 @@ void* customer(void* arg)
             pthread_mutex_unlock(&mutex_baguette);
         }
 
-        // Consume two petit-pains if available from deposit1
+
         pthread_mutex_lock(&mutex_petit_pain);
         if (petit_pain_deposit1 > 1)
         {
@@ -261,11 +254,9 @@ void* restaurant(void* arg)
 void* display_summary(void* arg)
 {
     {
-        // Lock the deposit mutexes first (always in the same order)
         pthread_mutex_lock(&mutex_deposit_A);
         pthread_mutex_lock(&mutex_deposit_B);
         pthread_mutex_lock(&mutex_deposit_C);
-        // Then lock the product and consumption mutexes
         pthread_mutex_lock(&mutex_baguette);
         pthread_mutex_lock(&mutex_petit_pain);
         pthread_mutex_lock(&mutex_consumption);
@@ -279,7 +270,7 @@ void* display_summary(void* arg)
         printf("Total Petit-pain Produced: %d, Consumed: %d\n", petit_pain_produced, restaurant_consumption);
         printf("=============================================\n");
 
-        // Unlock in reverse order
+
         pthread_mutex_unlock(&mutex_consumption);
         pthread_mutex_unlock(&mutex_petit_pain);
         pthread_mutex_unlock(&mutex_baguette);
